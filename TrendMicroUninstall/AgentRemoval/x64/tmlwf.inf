@@ -1,0 +1,106 @@
+;-------------------------------------------------------------------------
+; TMLWF.INF -- NDIS Usermode I/O Driver
+;
+; Copyright (c) Microsoft Corporation.  All rights reserved.
+;-------------------------------------------------------------------------
+[version]
+Signature   	= "$Windows NT$"
+Class     	= NetService
+ClassGUID  	= {4D36E974-E325-11CE-BFC1-08002BE10318}
+Provider    	= %TMIC%
+CatalogFile	= TMLWF.cat
+DriverVer=06/29/2011,6.8.0.1066
+
+[Manufacturer]
+%TMIC%=TMIC,NTx86,NTia64,NTamd64
+
+[TMIC]
+%Tmlwf_Desc%=Install, Tmlwf
+
+[TMIC.NTx86]
+%Tmlwf_Desc%=Install, Tmlwf
+
+[TMIC.NTia64]
+%Tmlwf_Desc%=Install, Tmlwf
+
+[TMIC.NTamd64]
+%Tmlwf_Desc%=Install, Tmlwf
+
+;-------------------------------------------------------------------------
+; Installation Section
+;-------------------------------------------------------------------------
+[Install]
+AddReg=Inst_Ndi
+Characteristics=0x40000
+NetCfgInstanceId="{5cbf81bd-5055-47cd-9055-a76b2b4e3698}"
+Copyfiles = tmlwf.copyfiles.sys
+
+[SourceDisksNames]
+1=%Tmlwf_Desc%,"",,
+
+[SourceDisksFiles]
+tmlwf.sys=1
+
+[DestinationDirs]
+DefaultDestDir=12
+tmlwf.copyfiles.sys=12
+
+[tmlwf.copyfiles.sys]
+tmlwf.sys,,,2
+
+
+;-------------------------------------------------------------------------
+; Ndi installation support
+;-------------------------------------------------------------------------
+[Inst_Ndi]
+HKR, Ndi,Service,,"tmlwf"
+HKR, Ndi,CoServices,0x00010000,"tmlwf"
+HKR, Ndi,HelpText,,%Tmlwf_HelpText%
+HKR, Ndi,FilterClass,, compression
+HKR, Ndi,FilterType,0x00010001,0x00000002
+HKR, Ndi\Interfaces,UpperRange,,"noupper"
+HKR, Ndi\Interfaces,LowerRange,,"nolower"
+HKR, Ndi\Interfaces, FilterMediaTypes,,"ethernet"
+HKR, Ndi,FilterRunType, 0x00010001, 2 ;this filter must run before any protocol can bind to the below miniport 
+
+;-------------------------------------------------------------------------
+; Service installation support
+;-------------------------------------------------------------------------
+[Install.Services]
+AddService=tmlwf,,Tmlwf_Service_Inst
+
+[Tmlwf_Service_Inst]
+DisplayName     = %Tmlwf_Desc%
+ServiceType     = 1 ;SERVICE_KERNEL_DRIVER
+StartType       = 1 ;SERVICE_SYSTEM_START
+ErrorControl    = 1 ;SERVICE_ERROR_NORMAL
+ServiceBinary   = %12%\tmlwf.sys
+LoadOrderGroup  = NDIS
+Description     = %Tmlwf_Desc%
+AddReg          = Common.Params.reg
+
+[Install.Remove]
+DelFiles = tmlwf.copyfiles.sys
+
+[Install.Remove.Services]
+DelService=tmlwf,0x200
+
+[Common.Params.reg]
+
+HKR, FilterDriverParams\DriverParam, 		ParamDesc, 	, "Driverparam for lwf"
+HKR, FilterDriverParams\DriverParam, 		default, 	, "5"
+HKR, FilterDriverParams\DriverParam, 		type, 		, "int"
+
+HKR, FilterAdapterParams\AdapterParam, 		ParamDesc, 	, "Adapterparam for lwf"
+HKR, FilterAdapterParams\AdapterParam, 		default, 	, "10"
+HKR, FilterAdapterParams\AdapterParam, 		type, 		, "int"
+
+[Strings]
+TMIC = "TrendMicro"
+Tmlwf_Desc = "Trend Micro NDIS 6.0 Filter Driver"
+Tmlwf_HelpText = "Trend Micro NDIS 6.0 Filter Driver"
+
+
+
+
+

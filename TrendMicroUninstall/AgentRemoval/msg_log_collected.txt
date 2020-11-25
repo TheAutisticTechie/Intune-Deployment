@@ -1,0 +1,11 @@
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-                                                                             -
+- Information about the last installation has been collected in a file on     -
+- your desktop:                                                               -
+-     WFBS_Debug_!TIMESTAMP!.zip                                              -
+- Please send it to Trend Micro Technical Support to help us improve the      -
+- installation process.                                                      -
+-                                                                             -
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------

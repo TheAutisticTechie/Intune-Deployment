@@ -1,0 +1,90 @@
+; -- TM_CFW.inf --
+;
+; TM_CFW driver INF file - this is the INF for the service (protocol) part.
+;
+; Copyright (C) 2001-2006 Trend Micro Inc. All rights reserved.
+;
+
+[Version]
+Signature  = "$Windows NT$"
+Class      = NetService
+ClassGUID  = {4D36E974-E325-11CE-BFC1-08002BE10318}
+Provider   = %Tmic%
+CatalogFile= TM_CFW.cat
+DriverVer=06/29/2011,6.8.0.1066
+
+[Manufacturer]
+%Tmic% = TMIC,NTx86,NTamd64,NTia64
+
+[ControlFlags]
+
+[TMIC]
+%Tmcfw_Desc% = Tmcfw.ndi, tm_cfw
+
+[TMIC.NTx86]
+%Tmcfw_Desc% = Tmcfw.ndi, tm_cfw
+
+[TMIC.NTamd64]
+%Tmcfw_Desc% = Tmcfw.ndi, tm_cfw
+
+[TMIC.NTia64]
+%Tmcfw_Desc% = Tmcfw.ndi, tm_cfw
+
+[Tmcfw.ndi]
+AddReg          = Tmcfw.ndi.AddReg, Tmcfw.AddReg
+Characteristics = 0x4410 ;  NCF_FILTER | NCF_NDIS_PROTOCOL !--Filter Specific--!!
+CopyFiles       = Tmcfw.Files.Sys
+CopyInf         = TM_CFWMP.inf
+
+[Tmcfw.ndi.Remove]
+DelFiles = Tmcfw.Files.Sys
+
+[Tmcfw.ndi.Remove.Services]
+DelService = tmcfw, 0x00000204
+
+[Tmcfw.ndi.Services]
+AddService = tmcfw,, Tmcfw.AddService
+
+[Tmcfw.AddService]
+DisplayName    = %TmcfwService_Desc%
+ServiceType    = 1 ;SERVICE_KERNEL_DRIVER
+StartType      = 3 ;SERVICE_DEMAND_START
+ErrorControl   = 1 ;SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\TM_CFW.sys
+LoadOrderGroup = PNP_TDI
+AddReg         = Tmcfw.AddService.AddReg
+
+[Tmcfw.AddService.AddReg]
+
+[SourceDisksNames]
+1=%DiskDescription%,"",,
+
+[SourceDisksFiles]
+TM_CFW.sys=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+Tmcfw.Files.Sys   = 12   ; %windir%\System32\drivers
+
+[Tmcfw.Files.Sys]
+TM_CFW.sys,,,2
+
+[Tmcfw.ndi.AddReg]
+HKR, Ndi, HelpText, , %Tmcfw_HELP%
+HKR, Ndi,            FilterClass,         , failover
+HKR, Ndi,            FilterDeviceInfId,   , tm_cfwmp
+HKR, Ndi,            Service,             , tmcfw
+HKR, Ndi\Interfaces, UpperRange,          , noupper
+HKR, Ndi\Interfaces, LowerRange,          , nolower
+HKR, Ndi\Interfaces, FilterMediaTypes,    , "ethernet, wan"
+
+[Tmcfw.AddReg]
+
+; ----------------------------------------------------------------------
+[Strings]
+Tmic = "Trend Micro"
+DiskDescription = "Trend Micro Common Firewall Driver Disk"
+
+Tmcfw_Desc = "Trend Micro Common Firewall Driver"
+Tmcfw_HELP = "Trend Micro Common Firewall Driver"
+TmcfwService_Desc = "Trend Micro Common Firewall Service"

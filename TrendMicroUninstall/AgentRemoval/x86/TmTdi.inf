@@ -1,0 +1,76 @@
+; -- TmTdi.inf --
+;
+; TM driver INF file - this is the INF for the TmTdi driver part.
+;
+; Copyright (C) 2001-2006 Trend Micro Inc. All rights reserved.
+;
+
+[Version]
+Signature  = "$Windows NT$"
+Class = NetService
+ClassGuid = {4d36e974-e325-11ce-bfc1-08002be10318}
+Provider   = %Tmic%
+CatalogFile= TmTdi.cat
+DriverVer=08/22/2011,6.8.0.1072
+
+[Manufacturer]
+%Tmic% = TMIC,NTamd64
+
+[TMIC]
+
+[TMIC.NTamd64]
+
+[SourceDisksNames]
+1=%DiskDescription%,"",,
+
+[SourceDisksFiles]
+tmtdi.sys=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+Tmtdi.Files.Sys   = 12   ; %windir%\System32\drivers
+;Tmtdi.Files.Inf   = 17	 ; %windir%\inf
+
+[DefaultInstall]
+OptionDesc          = %Tmtdi_Desc%
+CopyFiles           = Tmtdi.Files.Sys
+
+[DefaultInstall.Services]
+AddService = %Tmtdi_Serv%,,Tmtdi.Service
+
+[Tmtdi.Service]
+DisplayName    = %TmtdiService_Desc%
+ServiceType    = 1 ;SERVICE_KERNEL_DRIVER
+StartType      = 1 ;SERVICE_SYSTEM_START
+ErrorControl   = 1 ;SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\tmtdi.sys
+AddReg         = Tmtdi.Service.AddRegistry
+
+[DefaultUninstall]
+DelFiles		= Tmtdi.Files.Sys	;fix for NSC 5.5-00016
+;DelFiles   = Tmtdi.Files.Sys, Tmtdi.Files.Inf
+
+[DefaultUninstall.Services]
+DelService = %Tmtdi_Serv%,0x204
+;DelReg     = Tmtdi.Service.DelRegistry
+
+
+[Tmtdi.Service.AddRegistry]
+
+;[Tmtdi.Service.DelRegistry]
+
+[Tmtdi.Files.Sys]
+tmtdi.sys,,,2
+
+;[Tmtdi.Files.Inf]
+;TmTdi.inf,,,2
+
+; ----------------------------------------------------------------------
+[Strings]
+Tmic = "Trend Micro"
+DiskDescription = "Trend Micro TDI Driver Disk"
+
+Tmtdi_Desc = "Trend Micro TDI Driver"
+Tmtdi_Serv = "tmtdi"
+Tmtdi_HELP = "Trend Micro TDI Driver"
+TmtdiService_Desc = "Trend Micro TDI Driver"

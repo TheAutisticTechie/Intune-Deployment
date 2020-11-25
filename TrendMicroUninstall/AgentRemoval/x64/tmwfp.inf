@@ -1,0 +1,81 @@
+;-------------------------------------------------------------------------
+;;; Copyright (c) Trend Micro Corporation. All rights reserved
+;;;
+;;; Abstract:
+;;; WFP Callout driver for Trend Application filter and Generic Stream Scanning
+;-------------------------------------------------------------------------
+
+[Version]
+Signature   =   "$Windows NT$"
+Class = NetService
+ClassGuid = {4d36e974-e325-11ce-bfc1-08002be10318}
+Provider 	=   %TMIC%
+CatalogFile	= TMWFP.cat
+DriverVer=06/29/2011,6.8.0.1066
+
+[Manufacturer]
+%TMIC%=TMIC,NTamd64
+
+[TMIC]
+
+[TMIC.NTamd64]
+
+;-------------------------------------------------------------------------
+;; Default install sections
+;-------------------------------------------------------------------------
+
+[DefaultInstall]
+OptionDesc          = %tmwfpServiceDesc%
+CopyFiles           = tmwfp.DriverFiles
+
+[DefaultInstall.Services]
+AddService          = %tmwfpServiceName%,,tmwfp.Service
+
+[DestinationDirs]
+DefaultDestDir	        = 12
+tmwfp.DriverFiles      = 12 			;%windir%\system32\drivers
+
+[SourceDisksNames]
+1=%tmwfpServiceName%,"",,
+
+[SourceDisksFiles]
+tmwfp.sys=1
+
+;-------------------------------------------------------------------------
+;; Default uninstall sections
+;-------------------------------------------------------------------------
+
+[DefaultUninstall]
+DelFiles   = tmwfp.DriverFiles
+
+[DefaultUninstall.Services]
+DelService = tmwfp,0x200		; Flags note to stop service first
+
+;-------------------------------------------------------------------------
+; Services Section
+;-------------------------------------------------------------------------
+
+[tmwfp.Service]
+DisplayName      = %tmwfpServiceDesc%
+Description      = %tmwfpServiceDesc%
+ServiceBinary    = %12%\tmwfp.sys  	;%windir%\system32\drivers\tmwfp.sys
+ServiceType      = 1					;SERVICE_KERNEL_DRIVER
+StartType        = 2					;SERVICE_AUTO_START
+ErrorControl     = 1					;SERVICE_ERROR_NORMAL
+
+;-------------------------------------------------------------------------
+; Copy Files
+;-------------------------------------------------------------------------
+
+[tmwfp.DriverFiles]
+tmwfp.sys,,,0x00000002   ; COPYFLG_NOSKIP
+
+;-------------------------------------------------------------------------
+;; String Section
+;-------------------------------------------------------------------------
+
+[Strings]
+TMIC          	  = "Trend Micro"
+tmwfpServiceDesc  = "Trend Micro WFP Callout Driver"
+tmwfpServiceName  = "tmwfp"
+tmwfpRegistry     = "system\currentcontrolset\services\tmwfp"

@@ -1,0 +1,22 @@
+2019 08/07 15:02:26 --------Service started--------
+2019 08/07 15:02:26 Start to remove AcAgent
+2019 08/07 15:02:26 Service is not exist, name:[AcAgentService]
+2019 08/07 15:02:26 AcAgentService not found.
+2019 08/07 15:02:26 Service is not exist, name:[AcDriver]
+2019 08/07 15:02:26 AcDriver not found.
+2019 08/07 15:02:26 Service is not exist, name:[AcDriverHelper]
+2019 08/07 15:02:26 AcDriverHelper not found.
+2019 08/07 15:02:26 Finish removing AcAgent
+2019 08/07 15:02:26 Start to remove DLP
+2019 08/07 15:02:26 Service is not exist, name:[dsasvc]
+2019 08/07 15:02:26 [dsasvc] not found.
+2019 08/07 15:02:26 Service is not exist, name:[dlpnetfltr]
+2019 08/07 15:02:26 [dlpnetfltr] not found.
+2019 08/07 15:02:26 Service is not exist, name:[sakcd]
+2019 08/07 15:02:26 [sakcd] not found.
+2019 08/07 15:02:26 Service is not exist, name:[sakfile]
+2019 08/07 15:02:26 [sakfile] not found.
+2019 08/07 15:02:26 Service is not exist, name:[saknet]
+2019 08/07 15:02:26 [saknet] not found.
+2019 08/07 15:02:26 delete directory [C:\Windows\System32\dgagent], result: 0
+2019 08/07 15:02:26 Finish removing DLP
