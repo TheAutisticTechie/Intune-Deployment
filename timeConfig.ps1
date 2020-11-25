@@ -11,7 +11,7 @@ if ($type -ne "NTP") {
 }
 
 if ($service.Status -ne "Running") {
-    Start-Service $service
+    Start-Service "Windows Time"
 }
 
 w32tm /resync
