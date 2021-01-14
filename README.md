@@ -11,3 +11,6 @@ Force uninstalls Trend Micro
 
 ## Download Uploaded Intune Scripts
 Connect to Microsoft Graph and download all your uploaded scripts to Intune. Forked from nicolonsky
+
+## Windows Updates Reset
+Reset Windows Server Update Services so that devices can update automatically from Windows Update. Needed as our WSUS connected devices cannot update whilst working from home, and Intune policies are overridden by the WSUS setting
