@@ -2,10 +2,10 @@ $NtpServer = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32
 $type = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters\).Type
 $service = get-service -name "Windows Time"
 
-w32tm /config /manualpeerlist:"time.cloudflare.com,0x9" /syncfromflags:MANUAL /update
+w32tm /config /manualpeerlist:"time.cloudflare.com,0x4" /syncfromflags:MANUAL /update
 
 if ($NtpServer -ne "time.cloudflare.com,0x9") {
-    Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" -Name "NtpServer" -Type "String" -Value "time.cloudflare.com,0x9" -Force
+    Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" -Name "NtpServer" -Type "String" -Value "time.cloudflare.com,0x4" -Force
 }
 
 if ($type -ne "NTP") {
