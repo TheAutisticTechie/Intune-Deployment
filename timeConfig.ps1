@@ -4,7 +4,7 @@ $service = get-service -name "Windows Time"
 
 w32tm /config /manualpeerlist:"time.cloudflare.com,0x4" /syncfromflags:MANUAL /update
 
-if ($NtpServer -ne "time.cloudflare.com,0x9") {
+if ($NtpServer -ne "time.cloudflare.com,0x4") {
     Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" -Name "NtpServer" -Type "String" -Value "time.cloudflare.com,0x4" -Force
 }
 
