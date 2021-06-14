@@ -7,10 +7,23 @@ $type = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\
 $service = get-service -name "Windows Time"
 
 try {
-    w32tm /config /manualpeerlist:"time.cloudflare.com,0x4" /syncfromflags:MANUAL /update
+    w32tm /config /manualpeerlist:"time.cloudflare.com,0x1" /syncfromflags:MANUAL /update
     try {
-        if ($NtpServer -ne "time.cloudflare.com,0x4") {
-            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" -Name "NtpServer" -Type "String" -Value "time.cloudflare.com,0x4" -Force
+        if ($service.Status -ne "Running") {
+            Start-Service "Windows Time"
+            return
+        } else {
+            Restart-Service "Windows Time"
+            return
+        }
+    }
+    catch [SystemException] {
+        write-host "Error processing Windows Time service."
+    }
+    w32tm /resync
+    try {
+        if ($NtpServer -ne "time.cloudflare.com,0x1") {
+            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" -Name "NtpServer" -Type "String" -Value "time.cloudflare.com,0x1" -Force
             return
         }
     }
