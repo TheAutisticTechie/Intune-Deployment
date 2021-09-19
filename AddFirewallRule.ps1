@@ -14,7 +14,7 @@
 .INPUTS
   None
 .OUTPUTS
-  Log file stored in %SystemDrive%\Windows\TEMP\log_Update-TeamsFWRules.txt
+  Log file stored in %SystemDrive%\Windows\TEMP\log_Update-AddFWRules.txt
   Log file is copied to users own TEMP dir IF execution is successful.
 .NOTES
   Version:        2.0
@@ -34,7 +34,7 @@
 #region Declarations
 
 # Define a log path (defaults to system, but will be copied to the users own temp after successful execution.)
-$logPath = join-path -path $($env:SystemRoot) -ChildPath "\TEMP\log_Update-TeamsFWRules.txt"
+$logPath = join-path -path $($env:SystemRoot) -ChildPath "\TEMP\log_Update-AddFWRules.txt"
 
 # Enable forced rule creation, to cleanup any rules the user might have made,
 # and set the standards imposed by this script (suggested setting $True).
@@ -91,7 +91,6 @@ Function Set-TeamsFWRule($ProfileObj) {
 #region Execution
 
 #Start logging
-Start-Transcript $logPath -Force
 
 #Add rule to WFAS
 Try {
@@ -106,7 +105,7 @@ Try {
     Write-Output "$Message"
     exit 1
 } Finally {
-    #Make sure we stop logging no matter what whent down.
+    #Make sure we stop logging no matter what went down.
     Stop-Transcript
 }
 #endregion Execution

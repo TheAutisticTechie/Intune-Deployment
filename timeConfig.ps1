@@ -1,3 +1,31 @@
+<#
+.SYNOPSIS
+    Sets Cloudflare as the NTP server
+.DESCRIPTION
+    (c) Danny Murphy. All rights reserved.
+    Script provided as-is without any warranty of any kind. Use it freely at your own risks.
+    Must be run with elevated permissions. 
+    Designed to be run as user assigned PowerShell Script from Intune
+    The script will set Cloudflare as the time source
+    Requires PowerShell 3.0.
+.INPUTS
+  None
+.OUTPUTS
+  Log file stored in %SystemDrive%\Windows\TEMP\log_Update-timeConfig.txt
+.NOTES
+  Version:          2.0
+  Author:           Danny Murphy
+  Twitter:          @dltmurphy
+  Creation Date:    19 September 2021
+  Purpose/Change:   Intune managed devices with Cloudflare as the time source
+.EXAMPLE
+  .\timeConfig.ps1
+  Run as an administator or SYSTEM
+#>
+
+#Requires -Version 3
+#Requires -Runasadministrator
+
 # Stop if error
 $ErrorActionPreference = "stop"
 
@@ -5,6 +33,9 @@ $ErrorActionPreference = "stop"
 $NtpServer = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters\).NtpServer
 $type = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters\).Type
 $service = get-service -name "Windows Time"
+$logPath = Join-path -path $($env:SystemRoot) -ChildPath "\TEMP\log_timeConfig.txt"
+
+Start-Transcript $logPath -Force
 
 try {
     w32tm /config /manualpeerlist:"time.cloudflare.com,0x1" /syncfromflags:MANUAL /update
@@ -66,5 +97,6 @@ catch {
 }
 finally {
     $ErrorActionPreference = "continue"
+    Stop-Transcript
     w32tm /resync
 }

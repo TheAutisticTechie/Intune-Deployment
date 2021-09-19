@@ -13,7 +13,6 @@ $apps = @(
     "Microsoft.WindowsAlarms"
     "Microsoft.windowscommunicationsapps"
     "Microsoft.XboxApp"
-    "Microsoft.XboxApp"
     "Microsoft.XboxGameOverlay"
     "Microsoft.XboxGamingOverlay"
     "Microsoft.XboxIdentityProvider"
