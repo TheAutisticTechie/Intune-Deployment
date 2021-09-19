@@ -71,10 +71,10 @@ Function Set-TeamsFWRule($ProfileObj) {
         }
         
         if (-not (Get-NetFirewallApplicationFilter -Program $progPath -ErrorAction SilentlyContinue)) {
-            $ruleName = "Teams.exe for user $($ProfileObj.Name)"
+            $ruleName = "Teams.exe - $($ProfileObj.Name)"
             Write-Verbose "Adding Firewall rule: $ruleName" -Verbose
-            New-NetFirewallRule -DisplayName "$ruleName" -Direction Inbound -Profile Domain -Program $progPath -Action Allow -Protocol Any
-            New-NetFirewallRule -DisplayName "$ruleName" -Direction Inbound -Profile Public,Private -Program $progPath -Action Block -Protocol Any
+            New-NetFirewallRule -DisplayName "$ruleName" -Direction Inbound -Profile Domain,Private -Program $progPath -Action Allow -Protocol Any
+            New-NetFirewallRule -DisplayName "$ruleName" -Direction Inbound -Profile Public -Program $progPath -Action Block -Protocol Any
         } else {
             Write-Verbose "Rule already exists!" -Verbose
         }
