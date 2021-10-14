@@ -8,7 +8,6 @@ $apps = @(
     "Microsoft.MicrosoftSolitaireCollection"
     "Microsoft.NetworkSpeedTest"
     "Microsoft.People"
-    "Microsoft.Print3D"
     "Microsoft.SkypeApp"
     "Microsoft.WindowsAlarms"
     "Microsoft.windowscommunicationsapps"
