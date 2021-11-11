@@ -2,7 +2,6 @@
 # Until Intune releases the configuration profile to choose apps to remove
 
 $apps = @(
-    "Microsoft.GetHelp"
     "Microsoft.Getstarted"
     "Microsoft.Microsoft3DViewer"
     "Microsoft.MicrosoftSolitaireCollection"
