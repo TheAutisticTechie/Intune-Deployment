@@ -34,11 +34,25 @@ $NtpServer = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32
 $type = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters\).Type
 $service = get-service -name "Windows Time"
 $logPath = Join-path -path $($env:SystemRoot) -ChildPath "\TEMP\log_timeConfig.txt"
+$FrequencyCorrectRate = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config\).FrequencyCorrectRate
+$SpecialPollInterval = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient).SpecialPollInterval
+$UpdateInterval = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config\).UpdateInterval
+$MaxPollInterval = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config\).MaxPollInterval
+$MinPollInterval = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config\).MinPollInterfal
 
 Start-Transcript $logPath -Force
 
 try {
     w32tm /config /manualpeerlist:"time.cloudflare.com,0x1" /syncfromflags:MANUAL /update
+    try {
+        if ($service.StartType -ne "Automatic" ) {
+            Set-Service w32time -StartupType "Automatic"
+            return
+        }
+    }
+    catch [SystemException] {
+        Write-Host "Error processing Windows Time service."
+    }
     try {
         if ($service.Status -ne "Running") {
             Start-Service "Windows Time"
@@ -71,13 +85,44 @@ try {
         Write-Host "Unable to write to registry"
     }
     try {
-        if ($service.StartType -ne "Automatic" ) {
-            Set-Service w32time -StartupType "Automatic"
-            return
+        if ($FrequencyCorrectRate -ne 2) {
+            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" -Name "FrequencyCorrectRate" -Value "2"
         }
     }
-    catch [SystemException] {
-        Write-Host "Error processing Windows Time service."
+    catch [System.Management.Automation.PSArgumentException] {
+        Write-Host "Unable to write to registry"
+    }
+    try {
+        if ($MinPollInterval -ne 64) {
+            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" -Name "MinPollInterval" -Value "64"
+        }
+    }
+    catch [System.Management.Automation.PSArgumentException] {
+        Write-Host "Unable to write to registry"
+    }
+    try {
+        if ($MaxPollInterval -ne 64) {
+            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" -Name "MaxPollInterval" -Value "64"
+        }
+    }
+    catch [System.Management.Automation.PSArgumentException] {
+        Write-Host "Unable to write to registry"
+    }
+    try {
+        if ($UpdateInterval -ne 100) {
+            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" -Name "UpdateInterval" -Value "100"
+        }
+    }
+    catch [System.Management.Automation.PSArgumentException] {
+        Write-Host "Unable to write to registry"
+    }
+    try {
+        if ($SpecialPollInterval -ne 64) {
+            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient" -Name "SpecialPollInterval" -Value "64"
+        }
+    }
+    catch [System.Management.Automation.PSArgumentException] {
+        Write-Host "Unable to write to registry"
     }
     try {
         if ($service.Status -ne "Running") {
