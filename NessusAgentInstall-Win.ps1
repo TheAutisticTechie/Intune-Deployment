@@ -45,13 +45,13 @@ Param (
 
 ### Variables ###
 # Change these #
-$linkingKey = ""
+$key = ""
 $group = ""
 $downloadA32 = "NessusAgent-32.msi"
 $downloadA64 = "NessusAgent-64.msi"
 $downloadS32 = "Nessus-32.msi"
 $downloadS64 = "Nessus-64.msi"
-$blob = "https://######.blob.core.windows.net/scriptfiles/"
+$blob = "https://#####.blob.core.windows.net/scriptfiles/"
 
 # Do not change
 $temp = "c:\temp"
@@ -62,29 +62,12 @@ $testDestA = Test-Path -Path $destA -PathType Leaf
 $testDestS = Test-Path -Path $destS -PathType Leaf
 $logPath = Join-path -path $($env:SystemRoot) -ChildPath "\TEMP\log_NessusAgentInstall.txt"
 $arch = (Get-CimInstance Win32_operatingsystem).OSArchitecture
-$key= "NESSUS_KEY='" + $linkingKey + "'"
-$groups = "NESSUS_GROUPS='" + $group + "'"
-$server = "NESSUS_SERVER='cloud.tenable.com:443'"
-$msiArgsA = @(
-    "/i"
-    "$destA"
-    "$server"
-    "$key"
-    "$groups"
-    "/qn"
-)
-$msiArgsS = @(
-    "/i"
-    "$destS"
-    "$server"
-    "$key"
-    "$groups"
-    "/qn"
-)
 $ErrorActionPreference = "stop"
 ### END Variables ###
 
 Start-Transcript $logPath -append -Force
+Write-Output ""
+Write-Output ""
 try {
     # Check temp folder exists, create it if not
     if (!$agentsrc) {
@@ -115,7 +98,8 @@ try {
     if (-not($testDestA)) {
         try {
             Write-Output "Downloading the Agent"
-            Start-BitsTransfer -Source $agentsrc -Destination $destA
+            Invoke-WebRequest -Uri $agentsrc -OutFile $destA
+            Start-Sleep -Seconds 30
         }
         catch {
             throw $_.Exception.Message
@@ -133,7 +117,8 @@ try {
         
         try {
             Write-Output "Downloading the Scanner"
-            Start-BitsTransfer -Source $scannersrc -Destination $destS
+            Invoke-WebRequest -Uri $scannersrc -OutFile $destS
+            Start-Sleep -Seconds 30
         }
         catch {
             throw $_.Exception.Message
@@ -143,9 +128,16 @@ try {
     # Install Agent
     if ($testDestA) {
         try {
-            Write-Output "Beginning the Agent install, please do not shut down the computer"
-            Start-Process "msiexec.exe" -ArgumentList $msiArgsA -wait -NoNewWindow
-            Write-Output "The Agent is still being installed, please keep the device on for at least another 10 minutes"
+            Write-Output "Beginning the Agent install, please do not shut down the computer for at least 10 minutes"
+            msiexec.exe /i \temp\NessusAgent.msi /qn
+            Start-Sleep -Seconds 120
+            if ($arch -eq "64-bit") {
+                set-location 'C:\Program Files\Tenable\Nessus Agent\'
+            } else {
+                set-location 'C:\Program Files (x86)\Tenable\Nessus\'
+            }
+            .\nessuscli agent link --key=$key --cloud --groups=$group
+
         }
         catch {
             throw $_.Exception.Message
@@ -156,8 +148,17 @@ try {
     if ($scanner -eq $true -and $testDestS) {
         try {
             Write-Output "Beginning the Scanner install, please do not shut down the computer"
-            Start-Process "msiexec.exe" -ArgumentList $msiArgsS -wait -NoNewWindow
-            Write-Output "The Scanner is still being installed, please keep the device on for at least another 10 minutes"
+            c:\temp\Nessus.msi /qn
+            Write-Output "The Scanner is still being installed, please wait."
+            Start-Sleep -Seconds 120
+            if ($arch -eq "64-bit") {
+                set-location 'C:\Program Files\Tenable\Nessus\'
+            } else {
+                set-location 'C:\Program Files (x86)\Tenable\Nessus\'
+            }
+            Stop-Service -Name "Tenable Nessus"
+            .\nessuscli managed link --key=$key --cloud
+            Start-Service -Name "Tenable Nessus"
         }
         catch {
             throw $_.Exception.Message
@@ -165,6 +166,7 @@ try {
     }
 
     # Cleanup
+    Write-Output "Cleaning up after the script, almost finished"
     if ($cleanTemp -eq $true) {
         try {
             Remove-Item $temp -recurse -force
@@ -186,6 +188,10 @@ try {
             throw $_.Exception.Message
         }
     }
+    Start-Sleep -Seconds 10
+    Write-Output "Completed"
+    Write-Output ""
+    Write-Output ""
 }
 catch {
     Write-Host "An error has occurred"
