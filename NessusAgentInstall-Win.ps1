@@ -99,7 +99,7 @@ try {
         try {
             Write-Output "Downloading the Agent"
             Invoke-WebRequest -Uri $agentsrc -OutFile $destA
-            Start-Sleep -Seconds 30
+            Start-Sleep -Seconds 60
         }
         catch {
             throw $_.Exception.Message
@@ -118,7 +118,7 @@ try {
         try {
             Write-Output "Downloading the Scanner"
             Invoke-WebRequest -Uri $scannersrc -OutFile $destS
-            Start-Sleep -Seconds 30
+            Start-Sleep -Seconds 60
         }
         catch {
             throw $_.Exception.Message
