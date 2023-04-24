@@ -8,6 +8,7 @@ $apps = @(
     "Microsoft.NetworkSpeedTest"
     "Microsoft.People"
     "Microsoft.SkypeApp"
+    "MicrosoftTeams"
     "Microsoft.WindowsAlarms"
     "Microsoft.windowscommunicationsapps"
     "Microsoft.XboxApp"
@@ -31,7 +32,7 @@ $apps = @(
 foreach ($app in $apps){
 	try {
 		Get-AppxPackage $app | Remove-AppxPackage
-        Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $app | Remove-AppxProvisionedPackage -Online
+        	Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $app | Remove-AppxProvisionedPackage -Online
 	} catch {
 		write-host "Error uninstalling application"
 	}
