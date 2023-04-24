@@ -31,8 +31,8 @@ $apps = @(
 
 foreach ($app in $apps){
 	try {
-		Get-AppxPackage $app | Remove-AppxPackage
-        	Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $app | Remove-AppxProvisionedPackage -Online
+		Get-AppxPackage $app -AllUsers | Remove-AppxPackage -AllUsers
+        	Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $app | Remove-AppxProvisionedPackage -Online -AllUsers
 	} catch {
 		write-host "Error uninstalling application"
 	}
