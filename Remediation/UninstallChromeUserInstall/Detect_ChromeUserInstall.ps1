@@ -4,12 +4,12 @@
 # Description:    Detects if Chrome is installed at the user level
 #
 #=============================================================================================================================
-
-$appdata = test-path -path "$env:LOCALAPPDATA\Google\Chrome\Application"
+$appdata = "$env:LOCALAPPDATA\Google\Chrome\Application"
+$appdataTest = test-path -path $appdata
 $regKey = test-path -path "hkcu\Google\Chrome\Application"
 
 try {
-    if(($regKey -eq "True") -or ($appdata -eq "True")){
+    if(($regKey) -or ($appdataTest)){
         write-host Detected
         exit 1 # detected
     } else {

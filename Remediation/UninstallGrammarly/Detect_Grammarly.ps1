@@ -5,11 +5,12 @@
 #
 #=============================================================================================================================
 
-$appdata = test-path -path "$env:LOCALAPPDATA\Grammarly\DesktopIntegrations"
+$appdata = "$env:LOCALAPPDATA\Grammarly\DesktopIntegrations"
+$appdataTest = test-path -path $appdata
 $regKey = test-path -path "hkcu\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Grammarly Desktop Integrations"
 
 try {
-    if(($regKey -eq "True") -or ($appdata -eq "True")){
+    if(($regKey) -or ($appdataTest)){
         write-host Detected
         exit 1 # detected
     } else {
