@@ -10,7 +10,7 @@ $regKey = test-path -path "hkcu\Google\Chrome\Application"
 
 try {
     if(($regKey) -or ($appdataTest)){
-        write-host Detected
+        write-host "Detected"
         exit 1 # detected
     } else {
         Write-host "Not Detected"

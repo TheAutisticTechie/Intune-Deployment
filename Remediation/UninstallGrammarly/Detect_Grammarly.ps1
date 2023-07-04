@@ -11,7 +11,7 @@ $regKey = test-path -path "hkcu\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninst
 
 try {
     if(($regKey) -or ($appdataTest)){
-        write-host Detected
+        write-host "Detected"
         exit 1 # detected
     } else {
         Write-host "Not Detected"
