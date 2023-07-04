@@ -5,8 +5,8 @@
 #
 #=============================================================================================================================
 
-$appdata = "$env:LOCALAPPDATA\Grammarly\DesktopIntegrations"
-$regKey = "hkcu\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Grammarly Desktop Integrations"
+$appdata = test-path -path "$env:LOCALAPPDATA\Grammarly\DesktopIntegrations"
+$regKey = test-path -path "hkcu\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Grammarly Desktop Integrations"
 
 try {
     try {
@@ -14,7 +14,7 @@ try {
         exit 0
     }
     catch {
-        if($regKey -or $appdata) {
+        if(($regKey -eq "True") -or ($appdata -eq "True")){
             exit 0 # detected
         } else {
             exit 1 # doesn't exist
