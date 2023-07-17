@@ -1,7 +1,8 @@
 ﻿#=============================================================================================================================
 #
-# Script Name:    Detect_LocalUser_Missing.ps1
-# Description:    Detects if the local user used for LAPS is missing or present
+# Script Name:      Detect_LocalUser_Missing.ps1
+# Description:      Detects if the local user used for LAPS is missing or present
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 

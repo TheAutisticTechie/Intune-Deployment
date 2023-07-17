@@ -1,7 +1,8 @@
 #=============================================================================================================================
 #
-# Script Name:    Detect_Zoom.ps1
-# Description:    Detects if Zoom is installed
+# Script Name:      Detect_Zoom.ps1
+# Description:      Detects if Zoom is installed
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 

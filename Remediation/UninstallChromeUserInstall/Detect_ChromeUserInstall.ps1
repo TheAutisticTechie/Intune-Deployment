@@ -1,7 +1,8 @@
 #=============================================================================================================================
 #
-# Script Name:    Detect_ChromeUserInstall.ps1
-# Description:    Detects if Chrome is installed at the user level
+# Script Name:      Detect_ChromeUserInstall.ps1
+# Description:      Detects if Chrome is installed at the user level
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 $appdata = "$env:LOCALAPPDATA\Google\Chrome\Application"

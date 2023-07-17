@@ -1,7 +1,8 @@
 #=============================================================================================================================
 #
-# Script Name:    Remediate_BuiltInApps.ps1
-# Description:    Uninstall specific built-in apps
+# Script Name:      Remediate_BuiltInApps.ps1
+# Description:      Uninstall specific built-in apps
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 

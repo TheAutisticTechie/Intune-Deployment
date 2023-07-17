@@ -1,7 +1,8 @@
 #=============================================================================================================================
 #
-# Script Name:    Remediate_Zoom.ps1
-# Description:    Uninstall Zoom
+# Script Name:      Remediate_Zoom.ps1
+# Description:      Uninstall Zoom
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 

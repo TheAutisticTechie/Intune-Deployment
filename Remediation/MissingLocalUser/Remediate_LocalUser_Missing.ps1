@@ -3,6 +3,7 @@
 # Script Name:      Remediate_LocalUser_Missing.ps1
 # Description:      Remediates the local user used for LAPS if it was missing
 #                   Currently doesn't work with LAPS
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 

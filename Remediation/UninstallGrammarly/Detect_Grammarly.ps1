@@ -1,7 +1,8 @@
 #=============================================================================================================================
 #
-# Script Name:    Detect_Grammarly.ps1
-# Description:    Detects if Grammarly is installed
+# Script Name:      Detect_Grammarly.ps1
+# Description:      Detects if Grammarly is installed
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 

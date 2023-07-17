@@ -1,7 +1,8 @@
 #=============================================================================================================================
 #
-# Script Name:    Detect_BuiltInApps.ps1
-# Description:    Detects if specific built-in apps are installed
+# Script Name:      Detect_BuiltInApps.ps1
+# Description:      Detects if specific built-in apps are installed
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 

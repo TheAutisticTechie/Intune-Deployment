@@ -1,7 +1,8 @@
 #=============================================================================================================================
 #
-# Script Name:    Remediate_Grammarly.ps1
-# Description:    Uninstall Grammarly
+# Script Name:      Remediate_Grammarly.ps1
+# Description:      Uninstall Grammarly
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 

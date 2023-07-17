@@ -1,7 +1,8 @@
 #=============================================================================================================================
 #
-# Script Name:    Remediate_ChromeUserInstall.ps1
-# Description:    Uninstall Chrome from the user profile
+# Script Name:      Remediate_ChromeUserInstall.ps1
+# Description:      Uninstall Chrome from the user profile
+# Author:           Danny Chrismas - TheAutisticTechie
 #
 #=============================================================================================================================
 
