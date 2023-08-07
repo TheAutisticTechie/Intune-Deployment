@@ -14,8 +14,7 @@
   None
 .NOTES
   Version:          2.0
-  Author:           Danny Murphy
-  Twitter:          @dltmurphy
+  Author:           Danny Chrismas @TheAutisticTechie
   Creation Date:    19 September 2021
   Purpose/Change:   Reset Windows Update Services to Microsoft's CDN
 .EXAMPLE
