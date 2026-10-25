@@ -1,9 +1,27 @@
-﻿$thumbprint = "#" # Thumbprint of the cert
+$thumbprint = "#" # Thumbprint of the cert
 $iisAppPoolName = "#" # Name of the pool under Application Pools
 
-$keyname = (((gci cert:\LocalMachine\my | ? {$_.thumbprint -like $thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
-$keypath = $env:ProgramData + “\Microsoft\Crypto\RSA\MachineKeys\”
-$fullpath = $keypath + $keyname
+$ErrorActionPreference = "Stop"
+
+$cert = Get-ChildItem Cert:\LocalMachine\My | Where-Object { $_.Thumbprint -eq $thumbprint }
+if (!$cert) {
+    throw "Certificate $thumbprint not found in LocalMachine\My"
+}
+
+# Most current certificates use CNG keys stored under Crypto\Keys; older ones use CSP keys under Crypto\RSA\MachineKeys
+$rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)
+if ($rsa -is [System.Security.Cryptography.RSACng]) {
+    $fullpath = Join-Path $env:ProgramData "Microsoft\Crypto\Keys\$($rsa.Key.UniqueName)"
+} elseif ($rsa -is [System.Security.Cryptography.RSACryptoServiceProvider]) {
+    $fullpath = Join-Path $env:ProgramData "Microsoft\Crypto\RSA\MachineKeys\$($rsa.CspKeyContainerInfo.UniqueKeyContainerName)"
+} else {
+    throw "Certificate $thumbprint has no RSA private key on this machine"
+}
+
+# Stop rather than change the permissions on the key folder itself
+if (!(Test-Path -Path $fullpath -PathType Leaf)) {
+    throw "Private key file not found: $fullpath"
+}
 
 $Acl = Get-Acl $fullpath
 $Ar = New-Object System.Security.AccessControl.FileSystemAccessRule("IIS AppPool\$iisAppPoolName", "Read", "Allow")
