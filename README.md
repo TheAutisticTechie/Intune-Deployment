@@ -8,7 +8,7 @@ Checks if Sophos Endpoint is currently installed before downloading and installi
 
 ## Time Config
 
-Sets time.cloudflare.com as the NTP server
+Remediation (Remediation/TimeConfig) that sets time.cloudflare.com as the NTP server and keeps the Windows Time service running on laptops that aren't joined to an AD domain. Run it as SYSTEM on a daily schedule
 
 ## Trend Uninstall (archived)
 
