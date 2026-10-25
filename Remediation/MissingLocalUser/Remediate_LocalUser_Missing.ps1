@@ -7,6 +7,13 @@
 #
 #=============================================================================================================================
 
+# Intune runs remediation scripts in 32-bit PowerShell unless "Run script in 64-bit PowerShell" is enabled, and the
+# LocalAccounts cmdlets (Get-LocalUser, New-LocalUser) don't exist there. Relaunch in the native host
+if ($env:PROCESSOR_ARCHITEW6432 -and (Test-Path "$env:SystemRoot\SysNative\WindowsPowerShell\v1.0\powershell.exe")) {
+    & "$env:SystemRoot\SysNative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath
+    exit $LASTEXITCODE
+}
+
 # Variables
 $user = "helpdesk"
 
