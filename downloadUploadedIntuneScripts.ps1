@@ -1,32 +1,53 @@
-# https://gist.github.com/dltmurphy/b325e762e3028146cdcad8af81948935
+# https://gist.github.com/theautistictechie/b325e762e3028146cdcad8af81948935
 
-#connects to the default poSH app (Microsoft Intune PowerShell); d1ddf0e4-d672-4dae-b554-9d5bdfd93547
-Connect-MSGraph
-Update-MSGraphEnvironment -SchemaVersion "Beta"
-Connect-MSGraph
+# The shared Microsoft Intune PowerShell app that Connect-MSGraph used was removed in April 2024, so this uses the
+# Microsoft Graph PowerShell SDK instead: Install-Module Microsoft.Graph.Authentication -Scope CurrentUser
+# Pass -ClientId and -TenantId to sign in with your own app registration rather than the SDK's default app
+param (
+    [string]$ClientId,
+    [string]$TenantId
+)
 
-# Get device configuration - PowerShell scripts
-$request= Invoke-MSGraphRequest -HttpMethod GET -Url "deviceManagement/deviceManagementScripts" -Verbose
+$connectParams = @{ Scopes = "DeviceManagementScripts.Read.All"; NoWelcome = $true }
+if ($ClientId) { $connectParams.ClientId = $ClientId }
+if ($TenantId) { $connectParams.TenantId = $TenantId }
+Connect-MgGraph @connectParams
 
-$allScripts= @()
+# Get device configuration - PowerShell scripts, following any further pages
+$scriptIds = @()
+$uri = "beta/deviceManagement/deviceManagementScripts"
+while ($uri) {
+    $request = Invoke-MgGraphRequest -Method GET -Uri $uri
+    foreach ($item in $request.value) {
+        $scriptIds += $item.id
+    }
+    $uri = $request.'@odata.nextLink'
+}
 
-$request.value.GetEnumerator() | ForEach-Object {
+$allScripts = foreach ($id in $scriptIds) {
+    # The list doesn't include the script body, so fetch each script individually
+    $currentScript = Invoke-MgGraphRequest -Method GET -Uri "beta/deviceManagement/deviceManagementScripts/$id"
+    $bytes = [System.Convert]::FromBase64String($currentScript.scriptContent)
 
-    #https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts
-    $currentScript =Invoke-MSGraphRequest -HttpMethod GET -Url "deviceManagement/deviceManagementScripts/$($PSItem.id)"
-    
-    $allScripts += [PSCustomObject]@{
+    [PSCustomObject]@{
         id = $currentScript.id
         displayName = $currentScript.displayName
         description = $currentScript.description
-        scriptContent = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($currentScript.scriptContent))
+        scriptBytes = $bytes
+        scriptContent = [System.Text.Encoding]::UTF8.GetString($bytes)
     }
 }
 
 # export all scripts as PowerShell files to current directory
+# Write the original bytes so each script keeps the encoding it was uploaded with. Out-File would re-save it as UTF-16,
+# which Intune rejects if the script is uploaded again
+$cwd = Get-Location | Select-Object -ExpandProperty Path
+$invalidChars = [Regex]::Escape(-join [System.IO.Path]::GetInvalidFileNameChars())
+foreach ($item in $allScripts) {
+    $fileName = ($item.displayName -replace "[$invalidChars]", "_") + ".ps1"
+    [System.IO.File]::WriteAllBytes((Join-Path -Path $cwd -ChildPath $fileName), $item.scriptBytes)
+}
 
-$cwd = Get-Location | select -ExpandProperty Path
-$allScripts | ForEach-Object {$PSItem.scriptContent | Out-File -FilePath $(Join-Path -Path $cwd -ChildPath "$($psitem.displayName).ps1")}
-
-# export all scripts and metadata within a csv file  to current directory
-$allScripts | Export-Csv -Path $(Join-Path -Path $cwd -ChildPath "Intune-PowerShellScripts.csv") -Delimiter ";" -NoTypeInformation
+# export all scripts and metadata within a csv file to current directory
+$allScripts | Select-Object id, displayName, description, scriptContent |
+    Export-Csv -Path (Join-Path -Path $cwd -ChildPath "Intune-PowerShellScripts.csv") -Delimiter ";" -NoTypeInformation
