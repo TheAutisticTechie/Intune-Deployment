@@ -2,20 +2,20 @@
 .SYNOPSIS
     Sets Cloudflare as the NTP server
 .DESCRIPTION
-    (c) Danny Murphy. All rights reserved.
+    (c) Danny Chrismas. All rights reserved.
     Script provided as-is without any warranty of any kind. Use it freely at your own risks.
-    Must be run with elevated permissions. 
-    Designed to be run as user assigned PowerShell Script from Intune
+    Must be run with elevated permissions.
+    Designed to be run as a SYSTEM PowerShell Script from Intune
     The script will set Cloudflare as the time source
     Requires PowerShell 3.0.
 .INPUTS
   None
 .OUTPUTS
-  Log file stored in %SystemDrive%\Windows\TEMP\log_Update-timeConfig.txt
+  Log file stored in %SystemDrive%\Windows\TEMP\log_timeConfig.txt
 .NOTES
   Version:          2.0
-  Author:           Danny Murphy
-  Twitter:          @dltmurphy
+  Author:           Danny Chrismas
+  Twitter:          @theautistictechie
   Creation Date:    19 September 2021
   Purpose/Change:   Intune managed devices with Cloudflare as the time source
 .EXAMPLE
@@ -30,118 +30,49 @@
 $ErrorActionPreference = "stop"
 
 # Variables
-$NtpServer = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters\).NtpServer
-$type = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters\).Type
-$service = get-service -name "Windows Time"
+$configKey = "HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config"
+$ntpClientKey = "HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient"
 $logPath = Join-path -path $($env:SystemRoot) -ChildPath "\TEMP\log_timeConfig.txt"
-$FrequencyCorrectRate = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config\).FrequencyCorrectRate
-$SpecialPollInterval = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient).SpecialPollInterval
-$UpdateInterval = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config\).UpdateInterval
-$MaxPollInterval = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config\).MaxPollInterval
-$MinPollInterval = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config\).MinPollInterfal
+
+# W32Time uses different units per setting:
+#   MinPollInterval and MaxPollInterval are log2 seconds, so 6 = 64 seconds
+#   SpecialPollInterval is seconds, and must sit between MinPollInterval and MaxPollInterval
+#   UpdateInterval is 10ms units, so 100 = 1 second
+$settings = @(
+    @{ Path = $configKey;    Name = "FrequencyCorrectRate"; Value = 2 }
+    @{ Path = $configKey;    Name = "MinPollInterval";      Value = 6 }
+    @{ Path = $configKey;    Name = "MaxPollInterval";      Value = 6 }
+    @{ Path = $configKey;    Name = "UpdateInterval";       Value = 100 }
+    @{ Path = $ntpClientKey; Name = "SpecialPollInterval";  Value = 64 }
+)
 
 Start-Transcript $logPath -Force
 
 try {
+    foreach ($setting in $settings) {
+        $current = (Get-ItemProperty -Path $setting.Path).($setting.Name)
+        if ($current -ne $setting.Value) {
+            Write-Host "Setting $($setting.Name) from $current to $($setting.Value)"
+            Set-ItemProperty -Path $setting.Path -Name $setting.Name -Value $setting.Value -Type DWord
+        }
+    }
+
+    $service = Get-Service -Name "W32Time"
+    if ($service.StartType -ne "Automatic") {
+        Set-Service -Name "W32Time" -StartupType Automatic
+    }
+    if ($service.Status -ne "Running") {
+        Start-Service -Name "W32Time"
+    }
+
+    # Sets NtpServer and Type to NTP, then tells the service to reload all of the settings above
     w32tm /config /manualpeerlist:"time.cloudflare.com,0x1" /syncfromflags:MANUAL /update
-    try {
-        if ($service.StartType -ne "Automatic" ) {
-            Set-Service w32time -StartupType "Automatic"
-            return
-        }
-    }
-    catch [SystemException] {
-        Write-Host "Error processing Windows Time service."
-    }
-    try {
-        if ($service.Status -ne "Running") {
-            Start-Service "Windows Time"
-            return
-        } else {
-            Restart-Service "Windows Time"
-            return
-        }
-    }
-    catch [SystemException] {
-        write-host "Error processing Windows Time service."
-    }
     w32tm /resync
-    try {
-        if ($NtpServer -ne "time.cloudflare.com,0x1") {
-            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" -Name "NtpServer" -Type "String" -Value "time.cloudflare.com,0x1" -Force
-            return
-        }
-    }
-    catch [System.Management.Automation.PSArgumentException] {
-        Write-Host "Unable to write to registry"
-    }
-    try {
-        if ($type -ne "NTP") {
-            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters" -Name "Type" -Type "String" -Value "NTP" -Force
-            return
-        }
-    }
-    catch [System.Management.Automation.PSArgumentException] {
-        Write-Host "Unable to write to registry"
-    }
-    try {
-        if ($FrequencyCorrectRate -ne 2) {
-            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" -Name "FrequencyCorrectRate" -Value "2"
-        }
-    }
-    catch [System.Management.Automation.PSArgumentException] {
-        Write-Host "Unable to write to registry"
-    }
-    try {
-        if ($MinPollInterval -ne 64) {
-            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" -Name "MinPollInterval" -Value "64"
-        }
-    }
-    catch [System.Management.Automation.PSArgumentException] {
-        Write-Host "Unable to write to registry"
-    }
-    try {
-        if ($MaxPollInterval -ne 64) {
-            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" -Name "MaxPollInterval" -Value "64"
-        }
-    }
-    catch [System.Management.Automation.PSArgumentException] {
-        Write-Host "Unable to write to registry"
-    }
-    try {
-        if ($UpdateInterval -ne 100) {
-            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" -Name "UpdateInterval" -Value "100"
-        }
-    }
-    catch [System.Management.Automation.PSArgumentException] {
-        Write-Host "Unable to write to registry"
-    }
-    try {
-        if ($SpecialPollInterval -ne 64) {
-            Set-ItemProperty -Path Registry::"HKLM\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient" -Name "SpecialPollInterval" -Value "64"
-        }
-    }
-    catch [System.Management.Automation.PSArgumentException] {
-        Write-Host "Unable to write to registry"
-    }
-    try {
-        if ($service.Status -ne "Running") {
-            Start-Service "Windows Time"
-            return
-        } else {
-            Restart-Service "Windows Time"
-            return
-        }
-    }
-    catch [SystemException] {
-        write-host "Error processing Windows Time service."
-    }
 }
 catch {
-    Write-Host "An error has occurred"
+    Write-Host "An error has occurred: $($_.Exception.Message)"
+    exit 1
 }
 finally {
-    $ErrorActionPreference = "continue"
     Stop-Transcript
-    w32tm /resync
 }
