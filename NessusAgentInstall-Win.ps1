@@ -1,10 +1,10 @@
-﻿<#
+<#
 .SYNOPSIS
     Installs and configures the Nessus Agent for x64 or x86 architecture
 .DESCRIPTION
-    (c) Danny Murphy. All rights reserved.
+    (c) Danny Chrismas. All rights reserved.
     Script provided as-is without any warranty of any kind. Use it freely at your own risks.
-    Must be run with elevated permissions. 
+    Must be run with elevated permissions.
     The script will install and configure the correct Nessus Agent for the device's architecture
     Requires PowerShell 3.0.
 .INPUTS
@@ -15,8 +15,8 @@
   Log file stored in %SystemDrive%\Windows\TEMP\log_NessusAgentInstall.txt
 .NOTES
   Version:          1.0
-  Author:           Danny Murphy
-  Twitter:          @dltmurphy
+  Author:           Danny Chrismas
+  Twitter:          @theautistictechie
   Creation Date:    20 March 2022
   Purpose/Change:   Install and configure Nessus Agents for specific architecture automatically
 .EXAMPLE
@@ -55,146 +55,101 @@ $blob = "https://#####.blob.core.windows.net/scriptfiles/"
 
 # Do not change
 $temp = "c:\temp"
-$testTemp = Test-Path -Path $temp -PathType Container
 $destA = "c:\temp\NessusAgent.msi"
 $destS = "c:\temp\Nessus.msi"
-$testDestA = Test-Path -Path $destA -PathType Leaf
-$testDestS = Test-Path -Path $destS -PathType Leaf
 $logPath = Join-path -path $($env:SystemRoot) -ChildPath "\TEMP\log_NessusAgentInstall.txt"
-$arch = (Get-CimInstance Win32_operatingsystem).OSArchitecture
+# Native architecture (AMD64, x86 or ARM64), even when Intune runs this in 32-bit PowerShell
+$arch = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }
+# ProgramW6432 is the 64-bit Program Files even from 32-bit PowerShell, and is unset on 32-bit Windows
+$programFiles = if ($env:ProgramW6432) { $env:ProgramW6432 } else { $env:ProgramFiles }
 $ErrorActionPreference = "stop"
+# The progress bar makes Invoke-WebRequest very slow in Windows PowerShell
+$ProgressPreference = "SilentlyContinue"
 ### END Variables ###
+
+function Get-Installer($src, $dest) {
+    # Download from a URL, or copy from a file share
+    if ($src -match '^https?://') {
+        Invoke-WebRequest -Uri $src -OutFile $dest -UseBasicParsing
+    } else {
+        Copy-Item -Path $src -Destination $dest
+    }
+}
+
+function Install-Msi($msi) {
+    # msiexec returns straight away when called directly, so wait for it and check the result
+    $process = Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$msi`" /qn" -Wait -PassThru
+    # 1638 = another version is already installed, 3010 = installed but needs a restart
+    if ($process.ExitCode -notin 0, 1638, 3010) {
+        throw "msiexec failed for $msi with exit code $($process.ExitCode)"
+    }
+}
 
 Start-Transcript $logPath -append -Force
 Write-Output ""
 Write-Output ""
 try {
+    switch ($arch) {
+        "AMD64" { $agentFile = $downloadA64; $scannerFile = $downloadS64 }
+        "x86"   { $agentFile = $downloadA32; $scannerFile = $downloadS32 }
+        default { throw "Unsupported architecture: $arch - add an installer for it to this script" }
+    }
+
     # Check temp folder exists, create it if not
-    if (!$agentsrc) {
-        if (-not($testTemp)) {
-            try {
-                New-Item -path $temp -ItemType Directory
-                $cleanTemp = $True
-            }
-            catch {
-                throw $_.Exception.Message
-            }
-        } else {
-            $cleanTemp = $False
-        }
+    $cleanTemp = $False
+    if (-not (Test-Path -Path $temp -PathType Container)) {
+        New-Item -path $temp -ItemType Directory | Out-Null
+        $cleanTemp = $True
     }
 
-    # Download Agent
-    if ($arch -eq "64-bit") {
+    # Download Agent, unless it has already been staged
+    if (-not (Test-Path -Path $destA -PathType Leaf)) {
         if (!$agentsrc) {
-            $agentsrc = $blob + $downloadA64
+            $agentsrc = $blob + $agentFile
         }
-    }
-    if ($arch -eq "32-bit") {
-        if (!$agentsrc) {
-            $agentsrc = $blob + $downloadA32
-        }
-    }
-    if (-not($testDestA)) {
-        try {
-            Write-Output "Downloading the Agent"
-            Invoke-WebRequest -Uri $agentsrc -OutFile $destA
-            Start-Sleep -Seconds 60
-        }
-        catch {
-            throw $_.Exception.Message
-        }
+        Write-Output "Downloading the Agent"
+        Get-Installer $agentsrc $destA
     }
 
-    # Download Scanner
-    if ($scanner -eq $True -and -not($testDestS)) {
-        if (!$scannersrc -and $arch -eq "64-bit") {
-            $scannersrc = $blob + $downloadS64
+    # Download Scanner, unless it has already been staged
+    if ($scanner -and -not (Test-Path -Path $destS -PathType Leaf)) {
+        if (!$scannersrc) {
+            $scannersrc = $blob + $scannerFile
         }
-        if (!$scannersrc -and $arch -eq "32-bit") {
-            $scannersrc = $blob + $downloadS32
-        }
-        
-        try {
-            Write-Output "Downloading the Scanner"
-            Invoke-WebRequest -Uri $scannersrc -OutFile $destS
-            Start-Sleep -Seconds 60
-        }
-        catch {
-            throw $_.Exception.Message
-        }
+        Write-Output "Downloading the Scanner"
+        Get-Installer $scannersrc $destS
     }
 
     # Install Agent
-    if ($testDestA) {
-        try {
-            Write-Output "Beginning the Agent install, please do not shut down the computer for at least 10 minutes"
-            msiexec.exe /i \temp\NessusAgent.msi /qn
-            Start-Sleep -Seconds 120
-            if ($arch -eq "64-bit") {
-                set-location 'C:\Program Files\Tenable\Nessus Agent\'
-            } else {
-                set-location 'C:\Program Files (x86)\Tenable\Nessus\'
-            }
-            .\nessuscli agent link --key=$key --cloud --groups=$group
-
-        }
-        catch {
-            throw $_.Exception.Message
-        }
-    }
+    Write-Output "Beginning the Agent install, please do not shut down the computer"
+    Install-Msi $destA
+    & "$programFiles\Tenable\Nessus Agent\nessuscli.exe" agent link --key=$key --cloud --groups=$group
+    Write-Output "Agent link exited with code $LASTEXITCODE"
 
     # Install Scanner
-    if ($scanner -eq $true -and $testDestS) {
-        try {
-            Write-Output "Beginning the Scanner install, please do not shut down the computer"
-            c:\temp\Nessus.msi /qn
-            Write-Output "The Scanner is still being installed, please wait."
-            Start-Sleep -Seconds 120
-            if ($arch -eq "64-bit") {
-                set-location 'C:\Program Files\Tenable\Nessus\'
-            } else {
-                set-location 'C:\Program Files (x86)\Tenable\Nessus\'
-            }
-            Stop-Service -Name "Tenable Nessus"
-            .\nessuscli managed link --key=$key --cloud
-            Start-Service -Name "Tenable Nessus"
-        }
-        catch {
-            throw $_.Exception.Message
-        }
+    if ($scanner) {
+        Write-Output "Beginning the Scanner install, please do not shut down the computer"
+        Install-Msi $destS
+        Stop-Service -Name "Tenable Nessus"
+        & "$programFiles\Tenable\Nessus\nessuscli.exe" managed link --key=$key --cloud
+        Write-Output "Scanner link exited with code $LASTEXITCODE"
+        Start-Service -Name "Tenable Nessus"
     }
 
     # Cleanup
     Write-Output "Cleaning up after the script, almost finished"
-    if ($cleanTemp -eq $true) {
-        try {
-            Remove-Item $temp -recurse -force
-        }
-        catch {
-            throw $_.Exception.Message
-        }
+    if ($cleanTemp) {
+        Remove-Item $temp -recurse -force
+    } else {
+        Remove-Item $destA, $destS -Force -ErrorAction SilentlyContinue
     }
-    else {
-        try {
-            if ($testDestA) {
-                Remove-Item $destA
-            }
-            if ($testDestS) {
-                Remove-Item $destS
-            }
-        }
-        catch {
-            throw $_.Exception.Message
-        }
-    }
-    Start-Sleep -Seconds 10
     Write-Output "Completed"
     Write-Output ""
     Write-Output ""
 }
 catch {
-    Write-Host "An error has occurred"
+    Write-Output "An error has occurred: $($_.Exception.Message)"
+    exit 1
 }
 finally {
     $ErrorActionPreference = "continue"
