@@ -18,7 +18,7 @@ try {
             $job = Start-Job { & $env:APPDATA\Zoom\uninstall\installer.exe /uninstall /silent }
             Wait-Job $job
             Receive-Job $job
-            Start-Sleep -Seconds 30#uninstaller ends writing to the log at different speeds
+            Start-Sleep -Seconds 30 # uninstaller ends writing to the log at different speeds
             remove-item $env:APPDATA\Zoom\ -Force -Recurse
             exit 0 # detected
         }
