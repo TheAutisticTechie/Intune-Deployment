@@ -8,15 +8,23 @@
 
 $userData = "$env:LOCALAPPDATA\Google\Chrome\User Data"
 $appdata = "$env:LOCALAPPDATA\Google\Chrome\Application"
+$uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome"
 $appdataTest = test-path -path $appdata
-$regKey = test-path -path "hkcu\Google\Chrome\Application"
+$regKey = test-path -path $uninstallKey
 
 try {
     if(($regKey) -or ($appdataTest)){
         write-host Detected
-        $version = (Get-ChildItem -Directory $appdata | where-object Name -NotLike "SetupMetrics").name
-        $installer = "$appdata\$version\Installer\setup.exe"
-        & $installer --uninstall --force-uninstall
+        # Use the newest version's installer, as an update can leave more than one version folder
+        $installer = Get-ChildItem -Path "$appdata\*\Installer\setup.exe" -ErrorAction SilentlyContinue |
+            Sort-Object { $_.Directory.Parent.Name -as [version] } -Descending |
+            Select-Object -First 1
+        if ($installer) {
+            & $installer.FullName --uninstall --force-uninstall
+        } else {
+            # Installer is gone, so clear the leftover folder and uninstall entry so detection passes
+            remove-item -Path $appdata, $uninstallKey -Force -Recurse -ErrorAction SilentlyContinue
+        }
         remove-item -Path $userData -Force -Recurse
         exit 0 # detected
     } else {

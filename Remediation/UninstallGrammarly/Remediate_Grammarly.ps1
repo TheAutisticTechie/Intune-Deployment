@@ -7,13 +7,19 @@
 #=============================================================================================================================
 
 $appdata = "$env:LOCALAPPDATA\Grammarly\DesktopIntegrations"
+$uninstallKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Grammarly Desktop Integrations"
 $appdataTest = test-path -path $appdata
-$regKey = test-path -path "hkcu\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Grammarly Desktop Integrations"
+$regKey = test-path -path $uninstallKey
 
 try {
     if(($regKey) -or ($appdataTest)){
         write-host "Detected, attempting uninstall"
-        & $appdata\Uninstall.exe /S
+        if (test-path -path "$appdata\Uninstall.exe") {
+            & $appdata\Uninstall.exe /S
+        } else {
+            # Uninstaller is gone, so clear the leftover folder and uninstall entry so detection passes
+            remove-item -Path $appdata, $uninstallKey -Force -Recurse -ErrorAction SilentlyContinue
+        }
         exit 0 # detected
     } else {
         Write-host "Not Detected"

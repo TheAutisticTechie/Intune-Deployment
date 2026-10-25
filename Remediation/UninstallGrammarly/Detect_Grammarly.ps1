@@ -8,7 +8,7 @@
 
 $appdata = "$env:LOCALAPPDATA\Grammarly\DesktopIntegrations"
 $appdataTest = test-path -path $appdata
-$regKey = test-path -path "hkcu\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Grammarly Desktop Integrations"
+$regKey = test-path -path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Grammarly Desktop Integrations"
 
 try {
     if(($regKey) -or ($appdataTest)){

@@ -7,7 +7,7 @@
 #=============================================================================================================================
 $appdata = "$env:LOCALAPPDATA\Google\Chrome\Application"
 $appdataTest = test-path -path $appdata
-$regKey = test-path -path "hkcu\Google\Chrome\Application"
+$regKey = test-path -path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome"
 
 try {
     if(($regKey) -or ($appdataTest)){
