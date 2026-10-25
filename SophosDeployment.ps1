@@ -1,3 +1,11 @@
+#=============================================================================================================================
+#
+# Script Name:      SophosDeployment.ps1
+# Description:      Downloads and installs Sophos Endpoint if it isn't already installed
+# Author:           Danny Chrismas - TheAutisticTechie
+#
+#=============================================================================================================================
+
 # Download SophosSetup.exe from your Sophos Central account (it is already linked to your account, so no customer token
 # is needed) and upload it to storage you control, then run this script with -uri set to its URL.
 # Intune platform scripts can't pass parameters, so deploy this as a Win32 app with an install command such as:

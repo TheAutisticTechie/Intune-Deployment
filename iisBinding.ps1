@@ -1,3 +1,11 @@
+#=============================================================================================================================
+#
+# Script Name:      iisBinding.ps1
+# Description:      Adds HTTP and HTTPS (SNI) bindings for a list of host names to an IIS site
+# Author:           Danny Chrismas - TheAutisticTechie
+#
+#=============================================================================================================================
+
 $thumb = Read-Host "Enter the certificate thumbprint"
 $cert = Get-ChildItem Cert:\LocalMachine\WebHosting |Where-Object {$_.Thumbprint -eq $thumb}
 

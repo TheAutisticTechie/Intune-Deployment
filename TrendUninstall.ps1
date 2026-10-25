@@ -1,3 +1,11 @@
+#=============================================================================================================================
+#
+# Script Name:      TrendUninstall.ps1
+# Description:      Downloads and runs Trend Micro's uninstall tool to force uninstall the Security Agent
+# Author:           Danny Chrismas - TheAutisticTechie
+#
+#=============================================================================================================================
+
 # ARCHIVED - kept for reference, not for deployment. Uses Trend Micro's Worry-Free Business Security Agent uninstall
 # tool in the TrendMicroUninstall folder (with TrendMicroUninstall.bat as a standalone copy of its Uninstall.bat)
 

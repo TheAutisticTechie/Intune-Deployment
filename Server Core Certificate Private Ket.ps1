@@ -1,3 +1,11 @@
+#=============================================================================================================================
+#
+# Script Name:      Server Core Certificate Private Ket.ps1
+# Description:      Gives an IIS application pool read access to a certificate's private key
+# Author:           Danny Chrismas - TheAutisticTechie
+#
+#=============================================================================================================================
+
 $thumbprint = "#" # Thumbprint of the cert
 $iisAppPoolName = "#" # Name of the pool under Application Pools
 

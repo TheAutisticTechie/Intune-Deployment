@@ -1,4 +1,12 @@
-# https://gist.github.com/theautistictechie/b325e762e3028146cdcad8af81948935
+#=============================================================================================================================
+#
+# Script Name:      downloadUploadedIntuneScripts.ps1
+# Description:      Exports all Intune platform scripts, and a CSV of their details, to the current directory
+# Author:           Danny Chrismas - TheAutisticTechie
+# Based on:         A script by Nicola Suter (nicolonsky) - https://github.com/nicolonsky
+# Source:           https://gist.github.com/theautistictechie/b325e762e3028146cdcad8af81948935
+#
+#=============================================================================================================================
 
 # The shared Microsoft Intune PowerShell app that Connect-MSGraph used was removed in April 2024, so this uses the
 # Microsoft Graph PowerShell SDK instead: Install-Module Microsoft.Graph.Authentication -Scope CurrentUser
