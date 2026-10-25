@@ -1,8 +1,7 @@
 function Get-Up {
-    $dtformat = "\[DD/mm/yyyy HH:mm:ss tt\]"
-    $boot = Get-WmiObject win32_operatingsystem @{LABEL='LastBootUpTime';EXPRESSION={$_.ConverttoDateTime($_.lastbootuptime)}}
-    $uptime = (Get-Date)-($boot.LastBootUpTime -f $dtformat)
-    $display = "Uptime: " + $Uptime.Days + " days" 
+    $boot = (Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime
+    $uptime = (Get-Date) - $boot
+    $display = "Uptime: " + $uptime.Days + " days"
     Write-Output $display
 }
 
