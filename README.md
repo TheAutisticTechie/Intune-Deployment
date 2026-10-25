@@ -4,7 +4,7 @@ PRs are welcome
 
 ## Sophos Deployment
 
-Checks if Sophos Endpoint is currently installed before installing it using the parameters given. If you use it, ensure you change the customertoken and mgmtserver in the & $path --% line
+Checks if Sophos Endpoint is currently installed before downloading and installing it. Download SophosSetup.exe from your Sophos Central account, host it somewhere the devices can reach, and run the script with -uri set to its URL (for example as a Win32 app install command, as Intune platform scripts can't pass parameters)
 
 ## Time Config
 
