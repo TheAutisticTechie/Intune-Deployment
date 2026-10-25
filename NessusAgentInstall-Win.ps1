@@ -2,7 +2,7 @@
 .SYNOPSIS
     Installs and configures the Nessus Agent for x64 or x86 architecture
 .DESCRIPTION
-    (c) Danny Chrismas. All rights reserved.
+    (c) Danny Chrismas. Licensed under the MIT License, see LICENSE.
     Script provided as-is without any warranty of any kind. Use it freely at your own risks.
     Must be run with elevated permissions.
     The script will install and configure the correct Nessus Agent for the device's architecture

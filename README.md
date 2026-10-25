@@ -2,6 +2,10 @@
 
 PRs are welcome
 
+## Licence
+
+MIT, see [LICENSE](LICENSE). Code from other authors keeps its original notices: AddFirewallRule.ps1 (Microsoft and Michael Mardahl) and downloadUploadedIntuneScripts.ps1 (Nicola Suter). The TrendMicroUninstall folder and TrendMicroUninstall.bat are Trend Micro's own tool and aren't covered by this licence
+
 ## Sophos Deployment
 
 Checks if Sophos Endpoint is currently installed before downloading and installing it. Download SophosSetup.exe from your Sophos Central account, host it somewhere the devices can reach, and run the script with -uri set to its URL (for example as a Win32 app install command, as Intune platform scripts can't pass parameters)

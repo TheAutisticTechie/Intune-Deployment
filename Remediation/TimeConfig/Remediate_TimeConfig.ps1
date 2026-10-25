@@ -2,7 +2,7 @@
 .SYNOPSIS
     Sets Cloudflare as the NTP server
 .DESCRIPTION
-    (c) Danny Chrismas. All rights reserved.
+    (c) Danny Chrismas. Licensed under the MIT License, see LICENSE.
     Script provided as-is without any warranty of any kind. Use it freely at your own risks.
     Must be run with elevated permissions.
     Designed to be run as an Intune Remediation in the SYSTEM context, with Detect_TimeConfig.ps1 as the detection script

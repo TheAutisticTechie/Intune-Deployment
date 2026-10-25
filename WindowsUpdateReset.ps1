@@ -2,7 +2,7 @@
 .SYNOPSIS
     Reset Windows Update Services to Microsoft's CDN
 .DESCRIPTION
-    (c) Danny Chrismas. All rights reserved.
+    (c) Danny Chrismas. Licensed under the MIT License, see LICENSE.
     Script provided as-is without any warranty of any kind. Use it freely at your own risks.
     Must be run with elevated permissions.
     Designed to be run as a SYSTEM PowerShell Script from Intune
