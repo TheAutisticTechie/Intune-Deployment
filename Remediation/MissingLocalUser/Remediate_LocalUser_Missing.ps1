@@ -13,7 +13,11 @@ $user = "helpdesk"
 try {
     $exists = Get-LocalUser $user -ErrorAction SilentlyContinue
     if(!$exists) {
-        New-LocalUser -Name $user -NoPassword -Description "LAPS"
+        # Random password nobody knows, so the account is never left with a blank password before LAPS manages it
+        $bytes = New-Object byte[] 24
+        [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+        $password = ConvertTo-SecureString ([Convert]::ToBase64String($bytes)) -AsPlainText -Force
+        New-LocalUser -Name $user -Password $password -Description "LAPS"
         Get-ScheduledTask | Where-Object {$_.TaskName -eq 'PushLaunch'} | Start-ScheduledTask
         exit 0
     }

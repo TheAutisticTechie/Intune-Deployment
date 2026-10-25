@@ -12,12 +12,12 @@ $exists = Get-LocalUser $user -ErrorAction SilentlyContinue
 
 try {
     if(!$exists) {
-        exit 1
         Write-Host "Missing Local User"
+        exit 1
     }
     else {
-        exit 0
         Write-Host "Local User Present"
+        exit 0
     }
 }
 catch {
